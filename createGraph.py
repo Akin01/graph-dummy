@@ -39,6 +39,47 @@ class App:
         query = f"MATCH (n:{label}) DETACH DELETE n;"
         self.driver.run(query)
 
+    def createTrackRelation(self, filter_query: dict = None):
+        all_filter = ""
+
+        if filter_query != None:
+            all_filter = []
+
+            filter_query_1 = f"""
+                                SKIP {filter_query["skip"][0]} 
+                                LIMIT {filter_query["limit"][0]}
+                                """
+            filter_query_2 = f"""
+                                SKIP {filter_query["skip"][1]} 
+                                LIMIT {filter_query["limit"][1]}
+                                """
+            all_filter.append(filter_query_1)
+            all_filter.append(filter_query_2)
+
+        query = f"""
+                
+                MATCH (f1:Frame) WITH f1 
+                ORDER BY f1.timestamp 
+                {all_filter[0]}
+
+                MATCH (f2:Frame) WITH f1, f2 
+                ORDER BY f2.timestamp 
+                {all_filter[1]}
+
+                MATCH (f1:Frame)<--(o1:Object) WITH f1, f2, o1
+                MATCH (f2:Frame)<--(o2:Object) WITH f1, f2, o1, o2        
+                
+                WHERE NOT (o1)-[:Track]-(o2)
+                AND o1.id_track=o2.id_track
+                AND o1<>o2
+                AND f1.timestamp < f2.timestamp
+
+                MERGE o1-[:Track]->(o2)
+
+                """
+
+        self.driver.run(query)
+
 
 if __name__ == "__main__":
     # Aura queries use an encrypted connection using the "neo4j+s" URI scheme
