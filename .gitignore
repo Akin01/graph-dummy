@@ -1,0 +1,6 @@
+.idea
+env
+.createGraph.py.swp
+dummy_data.json
+readJsonUrl.py
+config.env

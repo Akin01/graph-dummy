@@ -1,0 +1,5 @@
+neo4j==5.2.0
+py2neo==2021.2.3
+python-environ==0.4.54
+tqdm==4.64.1
+
